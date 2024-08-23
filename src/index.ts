@@ -34,6 +34,10 @@ app.post('/api/malmobos',(req: Request, res: Response) =>{
     res.status(201).json(newMalmobo)
 })
 
+//UPDATE - PUT/PATCH
+
+//DELETE
+
 
 
 app.listen(PORT, () =>{
