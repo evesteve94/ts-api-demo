@@ -18,6 +18,7 @@ app.use(express.json());
 app.use('/api/malmobos', malmobosRoute);
 app.use('/api/posts', postsRoute);
 
+
 //Skapa en typ (interface)
 /*
 Retain the Malmobo interface: It provides type safety and documentation, 

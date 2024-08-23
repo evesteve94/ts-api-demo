@@ -1,7 +1,8 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import pool from '../db';
 import { QueryResult } from 'pg';
 import { handleError } from '../utils/errorHandling';
+import { postSchema } from '../validation';
 
 const router = Router();
 
@@ -30,8 +31,17 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 });
 
+// Middleware to validate Post data
+const validatePost = (req: Request, res: Response, next: NextFunction) => {
+    const { error } = postSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+    next();
+};
+
 // CREATE a new Post
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', validatePost, async (req: Request, res: Response) => {
     const { title, content, malmobo_id } = req.body;
     try {
         const result: QueryResult = await pool.query(
@@ -46,7 +56,7 @@ router.post('/', async (req: Request, res: Response) => {
 
 
 // UPDATE a Post
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', validatePost, async (req: Request, res: Response) => {
     const { id } = req.params;
     const { date, title, content, malmobo_id, created_at } = req.body;
     try {
