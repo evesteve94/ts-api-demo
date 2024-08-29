@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import pool from '../db';
 import { QueryResult } from 'pg';
 import { handleError } from '../utils/errorHandling';
-import { postSchema } from '../validation';
+import { postSchema } from '../validation/validation';
 
 const router = Router();
 
