@@ -1,5 +1,5 @@
 // SERVER
-import express, { Request, Response } from "express";
+import express from "express";
 import malmobosRoute from "./routes/malmoboRoute"; // Ensure correct path
 import postsRoute from "./routes/postRoute"
 
