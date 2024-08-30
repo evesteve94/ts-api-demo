@@ -1,92 +1,23 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import pool from '../db';
-import { QueryResult } from 'pg';
-import { handleError } from '../utils/errorHandling';
-import { postSchema } from '../validation';
+import * as postsController from '../controllers/posts.controllers';
+import { postSchema } from '../validation/validation';
 
 const router = Router();
 
-// READ all Posts
-router.get('/', async (req: Request, res: Response) => {
-    try {
-        const result: QueryResult = await pool.query("SELECT * FROM posts");
-        res.json(result.rows);
-    } catch (err) {
-        handleError(err, res);
-    }
-});
-
-// READ a single Post by ID
-router.get('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    try {
-        const result: QueryResult = await pool.query("SELECT * FROM posts WHERE id = $1", [id]);
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            res.status(404).send("Post not found");
-        }
-    } catch (err) {
-        handleError(err, res);
-    }
-});
-
-// Middleware to validate Post data
+// Middleware to validate Post data -Ensures incoming data meets the required format before reaching the controllers.
 const validatePost = (req: Request, res: Response, next: NextFunction) => {
-    const { error } = postSchema.validate(req.body);
+    const { error } = postSchema.validate(req.body, { abortEarly: false });
     if (error) {
-        return res.status(400).json({ error: error.details[0].message });
+        const errors = error.details.map(detail => detail.message);
+        return res.status(400).json({ errors });
     }
     next();
 };
 
-// CREATE a new Post
-router.post('/', validatePost, async (req: Request, res: Response) => {
-    const { title, content, malmobo_id } = req.body;
-    try {
-        const result: QueryResult = await pool.query(
-            "INSERT INTO posts (title, content, malmobo_id) VALUES ($1, $2, $3) RETURNING *",
-            [title, content, malmobo_id]
-        );
-        res.status(201).json(result.rows[0]);
-    } catch (err) {
-        handleError(err, res);
-    }
-});
-
-
-// UPDATE a Post
-router.put('/:id', validatePost, async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { date, title, content, malmobo_id, created_at } = req.body;
-    try {
-        const result: QueryResult = await pool.query(
-            "UPDATE posts SET date = $1, title = $2, content = $3, malmobo_id = $4, created_at = $5 WHERE id = $6 RETURNING *",
-            [date, title, content, malmobo_id, created_at, id]
-        );
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            res.status(404).send("Post not found");
-        }
-    } catch (err) {
-        handleError(err, res);
-    }
-});
-
-// DELETE a Post
-router.delete('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    try {
-        const result: QueryResult = await pool.query("DELETE FROM posts WHERE id = $1 RETURNING *", [id]);
-        if (result.rows.length > 0) {
-            res.status(204).send();
-        } else {
-            res.status(404).send("Post not found");
-        }
-    } catch (err) {
-        handleError(err, res);
-    }
-});
+router.get('/', postsController.getAllPosts);
+router.get('/:id', postsController.getPostById);
+router.post('/', validatePost, postsController.createPost);
+router.put('/:id', validatePost, postsController.updatePost);
+router.delete('/:id', postsController.deletePost);
 
 export default router;
