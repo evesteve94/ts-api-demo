@@ -7,3 +7,8 @@ export interface Posts {
     malmobo_id: number,
     created_at: string
 }
+
+// typ för title som query params
+export interface GetPostsByTitleQueryParams {
+    title?: string;
+}

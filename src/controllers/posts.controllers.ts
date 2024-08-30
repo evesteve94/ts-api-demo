@@ -1,12 +1,15 @@
-import { Request, Response } from 'express';
+import { Request, Response } from 'express-serve-static-core';
 import { handleError } from '../utils/errorHandling';
 import * as postHandlers from '../handlers/posts.handlers';
 import { PostsDTO } from '../dtos/posts.dto';
+import { GetPostsByTitleQueryParams } from '../types/posts.types'
 
-export const getAllPosts = async (req: Request, res: Response) => {
+// Request objektets "inre organ", 4de objektet är queryn - lägger till vår interface
+export const getAllPosts = async (req: Request<{}, {}, {}, GetPostsByTitleQueryParams>, res: Response) => {
+    const { title } = req.query; // Extraherar vår query-parameter (som vanligt)
     try {
-        const posts = await postHandlers.getAllPosts();
-        res.json(posts);
+        const posts = await postHandlers.getAllPosts(title); // skickar som argument till vår handler
+        res.json(posts); // returnerar vårt resultat
     } catch (err) {
         handleError(err, res);
     }

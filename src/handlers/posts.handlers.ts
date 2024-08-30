@@ -4,8 +4,18 @@ import pool from '../db';
 import { QueryResult } from 'pg';
 import { PostsDTO } from '../dtos/posts.dto'
 
-export const getAllPosts = async (): Promise<PostsDTO[]> => {
-    const result: QueryResult = await pool.query("SELECT * FROM posts");
+//                              title som parameter
+export const getAllPosts = async (title?: string): Promise<PostsDTO[]> => {
+    let query = "SELECT * FROM posts";
+    const queryParams: string[] = [];
+
+    //om title finns läggs en Query till för att filtrera resultat
+    if (title) {
+        query += " WHERE title ILIKE $1";
+        queryParams.push(`%${title}%`);
+    }
+
+    const result = await pool.query(query, queryParams);
     return result.rows;
 };
 

@@ -1,10 +1,12 @@
-import { Request, Response } from 'express';
+import { Request, Response } from 'express-serve-static-core';
 import { handleError } from '../utils/errorHandling';
 import * as malmoboHandlers from '../handlers/malmobos.handlers';
 import { MalmobosDTO } from '../dtos/malmobos.dto';
+import { Malmobos } from '../types/malmobos.types';
 
 export const getAllMalmobos = async (req: Request, res: Response) => {
     try {
+        //redan typad som Malmobos[] iom handlern ==> Promise<Malmobos[]>
         const malmobos = await malmoboHandlers.getAllMalmobos();
         res.json(malmobos);
     } catch (err) {
